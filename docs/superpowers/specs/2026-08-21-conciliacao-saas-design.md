@@ -1,5 +1,7 @@
 # Design: SaaS de Conciliação de Vendas Multi-tenant
 
+Nome do produto: **Katalagge**
+
 Data: 2026-08-21
 Status: Aprovado (aguardando revisão final do usuário)
 
