@@ -35,7 +35,9 @@ Entidade `Fonte de Dados`, por grupo/loja, dois tipos:
 - **Conector API**: quando o provedor oferece API, requer um adaptador de código próprio por provedor (autenticação e formato variam). Não é genérico ponto-a-clique. MVP entra apenas com upload manual; conectores de API são plugáveis incrementalmente conforme demanda.
 
 Todo dado, de qualquer fonte, é normalizado para o formato interno:
-`{loja, data, hora, valor, modalidade (pix/crédito/débito/parcelado), status, referência_externa, fonte}`.
+`{loja, data, hora, valor, modalidade (pix/crédito/débito/parcelado), status, referência_externa, fonte, operador_caixa}`.
+
+`operador_caixa` (nome do operador de caixa responsável pela transação) só vem do Sistema de Venda — demais fontes (banco/adquirente, faturamento) não têm essa informação, campo fica nulo nelas.
 
 O Sistema de Faturamento é uma fonte especial obrigatória — é o "gabarito" contra o qual as demais fontes conciliam.
 
@@ -43,7 +45,11 @@ O Sistema de Faturamento é uma fonte especial obrigatória — é o "gabarito" 
 
 Executa por loja + período (mês), disparado quando todas as fontes do período foram carregadas (ou manualmente pelo operador).
 
-**Matching**: chave = valor + modalidade + janela de tempo configurável (ex: ±15min, para cobrir diferença de relógio entre sistemas). Referência externa (NSU/código de autorização), quando presente nos dois lados, é usada como desempate/match forte.
+**Matching**: por loja, chave = valor + data/hora + modalidade, com janela de tempo configurável (ex: ±15min, para cobrir diferença de relógio entre sistemas). Referência externa (NSU/código de autorização), quando presente nos dois lados, é usada como desempate/match forte.
+
+**Data bancária vs. data de faturamento**: sistemas bancários (adquirente/banco) jogam a data de liquidação para o próximo dia útil quando ela cai em sábado/domingo (e aparentemente feriado nacional — a confirmar com dados reais durante o plano de conciliação) enquanto o Sistema de Faturamento sempre usa a data exata da venda. O matching de data precisa tolerar esse deslocamento (comparar contra a data exata OU o próximo dia útil dela), não tratar como divergência de valor/estorno.
+
+**Pix caindo na conta da matriz**: quando a modalidade é Pix, o valor às vezes cai na conta da matriz em vez da conta da própria loja (filial). Para Pix, o matching não deve depender do número/conta da loja batender — precisa considerar tanto o caso "caiu na conta da própria filial" quanto "caiu na conta da matriz", casando por valor + data/hora dentro do grupo. Modalidades que não são Pix continuam batendo pela conta da loja normalmente.
 
 **Tipos de divergência**:
 1. Faturado no sistema, mas cancelado/ausente na fonte externa → provável estorno não refletido.
@@ -91,7 +97,7 @@ users               (id, email, password_hash)
 memberships         (id, user_id, group_id, role: admin|operator|support)
 data_sources        (id, group_id, store_id, type: upload|api, provider, column_mapping json | api_config json)
 raw_imports         (id, data_source_id, period, file_s3_key, status, imported_at)
-transactions        (id, store_id, source, period, date, time, amount, modality, status, external_ref)
+transactions        (id, store_id, source, period, date, time, amount, modality, status, external_ref, cashier_operator?)
 reconciliation_runs (id, store_id, period, status, started_at, finished_at)
 divergences         (id, reconciliation_run_id, type, transaction_ids[], amount, details json)
 tickets             (id, divergence_id, group_id, store_id, status, assigned_to, description, resolution_note, created_at, resolved_at)
