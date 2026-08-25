@@ -2,3 +2,4 @@ node_modules
 .next
 .env
 .env.test
+next-env.d.ts
