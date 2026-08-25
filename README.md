@@ -14,6 +14,29 @@ Detalhes completos do produto em `docs/superpowers/specs/2026-08-21-conciliacao-
 
 Next.js 14 (App Router) + TypeScript, Prisma + PostgreSQL, bcryptjs (hash de senha), jose (sessão JWT), zod (validação), Vitest (testes).
 
+## Convenções de rotas de API protegidas
+
+Route Handlers (`route.ts`) são a camada de controller do Next.js: fazem autenticação, validação (zod) e mapeamento de status HTTP, e delegam a lógica de negócio para a camada de service em `src/server/services/`. Duas utilidades em `src/lib/auth/` cobrem o que se repete entre rotas:
+
+- **`withAuth(handler)`** ([withAuth.ts](src/lib/auth/withAuth.ts)) — envolve o handler, extrai a sessão do cookie e responde `401` automaticamente se não houver sessão válida. O handler recebe `(req, session)` já autenticado.
+- **`requireRole(userId, groupId, role?)`** ([requireRole.ts](src/lib/auth/requireRole.ts)) — checa se o usuário é membro do grupo (e, opcionalmente, se tem um `role` específico como `"admin"`); devolve uma `NextResponse` `403` ou `null`. Só é chamado depois que o `groupId` já foi extraído (query string ou body validado), por isso não faz parte do `withAuth`.
+
+Padrão pra novas rotas autenticadas:
+
+```ts
+export const POST = withAuth(async (req, session) => {
+  const parsed = mySchema.safeParse(await req.json());
+  if (!parsed.success) return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
+
+  const forbidden = await requireRole(session.userId, parsed.data.groupId, "admin");
+  if (forbidden) return forbidden;
+
+  // lógica de negócio via services/...
+});
+```
+
+Ver exemplos em `src/app/api/stores/route.ts` e `src/app/api/invites/route.ts`.
+
 ## Como rodar
 
 Pré-requisitos: Node 20+, Docker.
