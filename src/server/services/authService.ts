@@ -40,3 +40,25 @@ export async function login(input: LoginInput): Promise<LoginResult> {
 
   return { userId: user.id, email: user.email };
 }
+
+export type AcceptInviteInput = { pendingMembershipId: string; password: string };
+export type AcceptInviteResult = { userId: string; groupId: string; role: string };
+
+export async function acceptInvite(input: AcceptInviteInput): Promise<AcceptInviteResult> {
+  const pending = await db.pendingMembership.findUnique({ where: { id: input.pendingMembershipId } });
+  if (!pending) throw new AuthError("INVITE_NOT_FOUND", "Invite not found");
+
+  const passwordHash = await hashPassword(input.password);
+
+  return db.$transaction(async (tx) => {
+    let user = await tx.user.findUnique({ where: { email: pending.email } });
+    if (!user) {
+      user = await tx.user.create({ data: { email: pending.email, passwordHash } });
+    }
+    await tx.membership.create({
+      data: { userId: user.id, groupId: pending.groupId, role: pending.role },
+    });
+    await tx.pendingMembership.delete({ where: { id: pending.id } });
+    return { userId: user.id, groupId: pending.groupId, role: pending.role };
+  });
+}

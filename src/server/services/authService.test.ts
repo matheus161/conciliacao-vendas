@@ -61,3 +61,35 @@ describe("authService.login", () => {
     ).rejects.toMatchObject({ code: "INVALID_CREDENTIALS" });
   });
 });
+
+import { acceptInvite } from "./authService";
+import { inviteMember } from "./membershipService";
+
+describe("authService.acceptInvite", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("creates a new user and attaches the invited role", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+
+    const result = await acceptInvite({ pendingMembershipId: invite.id, password: "outrasenha1" });
+
+    expect(result.groupId).toBe(groupId);
+    expect(result.role).toBe("operator");
+
+    const remaining = await db.pendingMembership.findUnique({ where: { id: invite.id } });
+    expect(remaining).toBeNull();
+  });
+
+  it("throws INVITE_NOT_FOUND for an unknown invite", async () => {
+    await expect(
+      acceptInvite({ pendingMembershipId: "does-not-exist", password: "outrasenha1" })
+    ).rejects.toMatchObject({ code: "INVITE_NOT_FOUND" });
+  });
+});
