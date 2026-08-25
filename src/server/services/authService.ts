@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { hashPassword } from "@/lib/auth/password";
+import { hashPassword, verifyPassword } from "@/lib/auth/password";
 
 export class AuthError extends Error {
   code: "EMAIL_TAKEN" | "INVALID_CREDENTIALS" | "INVITE_NOT_FOUND";
@@ -26,4 +26,17 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
     });
     return { userId: user.id, groupId: group.id };
   });
+}
+
+export type LoginInput = { email: string; password: string };
+export type LoginResult = { userId: string; email: string };
+
+export async function login(input: LoginInput): Promise<LoginResult> {
+  const user = await db.user.findUnique({ where: { email: input.email } });
+  if (!user) throw new AuthError("INVALID_CREDENTIALS", "Invalid email or password");
+
+  const valid = await verifyPassword(input.password, user.passwordHash);
+  if (!valid) throw new AuthError("INVALID_CREDENTIALS", "Invalid email or password");
+
+  return { userId: user.id, email: user.email };
 }

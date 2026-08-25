@@ -32,3 +32,32 @@ describe("authService.signup", () => {
     ).rejects.toMatchObject({ code: "EMAIL_TAKEN" });
   });
 });
+
+import { login } from "./authService";
+
+describe("authService.login", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("returns the user for correct credentials", async () => {
+    await signup({ email: "admin@franquia.com", password: "supersecret1", groupName: "Franquia Norte" });
+
+    const result = await login({ email: "admin@franquia.com", password: "supersecret1" });
+    expect(result.email).toBe("admin@franquia.com");
+  });
+
+  it("throws INVALID_CREDENTIALS for a wrong password", async () => {
+    await signup({ email: "admin@franquia.com", password: "supersecret1", groupName: "Franquia Norte" });
+
+    await expect(
+      login({ email: "admin@franquia.com", password: "wrong-password" })
+    ).rejects.toMatchObject({ code: "INVALID_CREDENTIALS" });
+  });
+
+  it("throws INVALID_CREDENTIALS for an unknown email", async () => {
+    await expect(
+      login({ email: "nobody@nowhere.com", password: "whatever1" })
+    ).rejects.toMatchObject({ code: "INVALID_CREDENTIALS" });
+  });
+});
