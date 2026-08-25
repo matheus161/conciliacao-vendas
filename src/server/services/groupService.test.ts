@@ -1,0 +1,36 @@
+import { describe, it, expect, beforeEach } from "vitest";
+import { resetDb } from "../../../tests/helpers/resetDb";
+import { signup } from "./authService";
+import { createStore, listStores } from "./groupService";
+
+describe("groupService", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("creates a store and lists it back", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+
+    const store = await createStore(groupId, { name: "Loja Centro", code: "CTR" });
+    expect(store).toEqual({ id: expect.any(String), name: "Loja Centro", code: "CTR" });
+
+    const stores = await listStores(groupId);
+    expect(stores).toEqual([{ id: store.id, name: "Loja Centro", code: "CTR" }]);
+  });
+
+  it("only returns stores for the given group", async () => {
+    const groupA = await signup({ email: "a@x.com", password: "supersecret1", groupName: "A" });
+    const groupB = await signup({ email: "b@x.com", password: "supersecret1", groupName: "B" });
+
+    await createStore(groupA.groupId, { name: "Loja A", code: "A1" });
+    await createStore(groupB.groupId, { name: "Loja B", code: "B1" });
+
+    const storesA = await listStores(groupA.groupId);
+    expect(storesA).toHaveLength(1);
+    expect(storesA[0].name).toBe("Loja A");
+  });
+});
