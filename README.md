@@ -37,6 +37,17 @@ export const POST = withAuth(async (req, session) => {
 
 Ver exemplos em `src/app/api/stores/route.ts` e `src/app/api/invites/route.ts`.
 
+## Convenções de componentes de UI
+
+Padrões de tela que se repetem viram componente em `src/components/` em vez de serem copiados entre páginas. Hoje existem:
+
+- **`Button`** — `.btn .btn-primary`, com variante `block`.
+- **`Field`** — par label+input, com `hint` opcional.
+- **`FormError`** — mensagem de erro condicional (`role="alert"`).
+- **`OnboardShell`** — wrapper de marca (`.onboard`/`.onboard-wrap`/`.onboard-brand`) das telas de onboarding (login, signup).
+
+Ao construir ou alterar uma tela, prefira esses componentes existentes a reescrever o HTML/CSS na mão. Se um padrão novo aparecer repetido (mesma estrutura em 2+ lugares, ou claramente vai se repetir — ex: numa próxima tela do fluxo), extraia um componente novo em vez de duplicar; não é necessário esperar a terceira repetição.
+
 ## Como rodar
 
 Pré-requisitos: Node 20+, Docker.

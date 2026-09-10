@@ -3,6 +3,10 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { OnboardShell } from "@/components/OnboardShell";
+import { Field } from "@/components/Field";
+import { Button } from "@/components/Button";
+import { FormError } from "@/components/FormError";
 
 function safeRedirectTarget(next: string | null): string {
   if (next && /^\/(?!\/)/.test(next) && !next.includes("\\")) return next;
@@ -32,55 +36,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="onboard">
-      <div className="onboard-wrap">
-        <div className="onboard-brand">
-          <div className="onboard-brand-mark">K</div>
-          <div className="onboard-brand-name">Katalagge</div>
-        </div>
+    <OnboardShell>
+      <div className="onboard-card">
+        <h1>Entrar</h1>
+        <p className="lede">Acesse o painel de conciliação da sua franquia.</p>
 
-        <div className="onboard-card">
-          <h1>Entrar</h1>
-          <p className="lede">Acesse o painel de conciliação da sua franquia.</p>
+        <form onSubmit={handleSubmit}>
+          <Field
+            id="loginEmail"
+            label="E-mail"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Field
+            id="loginSenha"
+            label="Senha"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-          <form onSubmit={handleSubmit}>
-            <div className="field">
-              <label htmlFor="loginEmail">E-mail</label>
-              <input
-                id="loginEmail"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="loginSenha">Senha</label>
-              <input
-                id="loginSenha"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+          <FormError message={error} />
 
-            {error && (
-              <p className="field-error" role="alert">
-                {error}
-              </p>
-            )}
+          <Button block type="submit">
+            Entrar
+          </Button>
+        </form>
 
-            <button className="btn btn-primary btn-block" type="submit">
-              Entrar
-            </button>
-          </form>
-
-          <p className="onboard-foot">
-            Ainda não tem conta? <Link href="/signup">Criar conta</Link>
-          </p>
-        </div>
+        <p className="onboard-foot">
+          Ainda não tem conta? <Link href="/signup">Criar conta</Link>
+        </p>
       </div>
-    </div>
+    </OnboardShell>
   );
 }

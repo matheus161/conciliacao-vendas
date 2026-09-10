@@ -29,6 +29,11 @@ export async function POST(req: NextRequest) {
     });
     return response;
   } catch (err) {
+    // Revealing EMAIL_TAKEN is a known user-enumeration tradeoff (CWE-203): an attacker can
+    // probe arbitrary emails to learn which ones have an account. The correct fix — respond
+    // identically either way and email the outcome — needs transactional email, which this
+    // phase doesn't have (see Global Constraints in the fundação-multitenant plan). Revisit
+    // once that infra exists.
     if (err instanceof AuthError && err.code === "EMAIL_TAKEN") {
       return NextResponse.json({ error: "EMAIL_TAKEN" }, { status: 409 });
     }
