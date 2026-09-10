@@ -33,13 +33,15 @@ describe("stores API", () => {
       groupName: "Franquia Norte",
     });
 
-    const createRes = await POST(await authedPost(userId, { groupId, name: "Loja Centro", code: "CTR" }));
+    const createRes = await POST(
+      await authedPost(userId, { groupId, name: "Loja Centro", code: "CTR", city: "Belém, PA" })
+    );
     expect(createRes.status).toBe(201);
 
     const listRes = await GET(await authedGet(userId, groupId));
     expect(listRes.status).toBe(200);
     const stores = await listRes.json();
-    expect(stores).toEqual([{ id: expect.any(String), name: "Loja Centro", code: "CTR" }]);
+    expect(stores).toEqual([{ id: expect.any(String), name: "Loja Centro", code: "CTR", city: "Belém, PA" }]);
   });
 
   it("rejects an unauthenticated request with 401", async () => {

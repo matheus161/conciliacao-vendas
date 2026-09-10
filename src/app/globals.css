@@ -1,5 +1,6 @@
 :root {
   --paper: #eff2ef;
+  --paper-deep: #e2e8e1;
   --surface: #fbfcfb;
   --ink: #1c2b3a;
   --ink-muted: rgba(28, 43, 58, 0.62);
@@ -7,6 +8,7 @@
   --rule-strong: rgba(28, 43, 58, 0.24);
   --brass: #be6a1e;
   --brass-ink: #6e3d10;
+  --good: #2f6e52;
   --bad: #a63f32;
 }
 
@@ -146,6 +148,97 @@ input {
   color: var(--bad);
   margin-top: -4px;
   margin-bottom: 16px;
+}
+
+.field-hint {
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.field-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .field-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+/* ---- multi-step onboarding ---- */
+.steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 26px;
+}
+
+.step-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--rule);
+}
+
+.step-chip .n {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--paper-deep);
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-chip.done {
+  color: var(--ink);
+  border-color: var(--good);
+}
+
+.step-chip.done .n {
+  background: var(--good);
+  color: #fff;
+}
+
+.step-chip.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-color: var(--brass);
+}
+
+.step-chip.active .n {
+  background: var(--brass);
+  color: #fff;
+}
+
+.onboard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--ink-muted);
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
 /* ---- buttons ---- */

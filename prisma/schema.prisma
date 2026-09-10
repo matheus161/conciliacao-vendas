@@ -32,6 +32,7 @@ model Store {
   group     Group    @relation(fields: [groupId], references: [id])
   name      String
   code      String
+  city      String
   createdAt DateTime @default(now())
 
   @@unique([groupId, code])

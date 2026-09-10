@@ -8,6 +8,7 @@ const createStoreSchema = z.object({
   groupId: z.string().min(1),
   name: z.string().min(2),
   code: z.string().min(1),
+  city: z.string().min(1),
 });
 
 export const GET = withAuth(async (req, session) => {
@@ -29,6 +30,10 @@ export const POST = withAuth(async (req, session) => {
   const forbidden = await requireRole(session.userId, parsed.data.groupId, "admin");
   if (forbidden) return forbidden;
 
-  const store = await createStore(parsed.data.groupId, { name: parsed.data.name, code: parsed.data.code });
+  const store = await createStore(parsed.data.groupId, {
+    name: parsed.data.name,
+    code: parsed.data.code,
+    city: parsed.data.city,
+  });
   return NextResponse.json(store, { status: 201 });
 });

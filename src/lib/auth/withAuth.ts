@@ -8,9 +8,9 @@ type AuthedHandler<Ctx> = (
 ) => Promise<Response> | Response;
 
 export function withAuth<Ctx = unknown>(handler: AuthedHandler<Ctx>) {
-  return async (req: NextRequest, ctx: Ctx) => {
+  return async (req: NextRequest, ctx?: Ctx) => {
     const session = await getSessionFromRequest(req);
     if (!session) return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
-    return handler(req, session, ctx);
+    return handler(req, session, ctx as Ctx);
   };
 }

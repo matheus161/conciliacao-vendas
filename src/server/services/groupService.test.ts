@@ -15,19 +15,19 @@ describe("groupService", () => {
       groupName: "Franquia Norte",
     });
 
-    const store = await createStore(groupId, { name: "Loja Centro", code: "CTR" });
-    expect(store).toEqual({ id: expect.any(String), name: "Loja Centro", code: "CTR" });
+    const store = await createStore(groupId, { name: "Loja Centro", code: "CTR", city: "Belém, PA" });
+    expect(store).toEqual({ id: expect.any(String), name: "Loja Centro", code: "CTR", city: "Belém, PA" });
 
     const stores = await listStores(groupId);
-    expect(stores).toEqual([{ id: store.id, name: "Loja Centro", code: "CTR" }]);
+    expect(stores).toEqual([{ id: store.id, name: "Loja Centro", code: "CTR", city: "Belém, PA" }]);
   });
 
   it("only returns stores for the given group", async () => {
     const groupA = await signup({ email: "a@x.com", password: "supersecret1", groupName: "A" });
     const groupB = await signup({ email: "b@x.com", password: "supersecret1", groupName: "B" });
 
-    await createStore(groupA.groupId, { name: "Loja A", code: "A1" });
-    await createStore(groupB.groupId, { name: "Loja B", code: "B1" });
+    await createStore(groupA.groupId, { name: "Loja A", code: "A1", city: "Belém, PA" });
+    await createStore(groupB.groupId, { name: "Loja B", code: "B1", city: "São Paulo, SP" });
 
     const storesA = await listStores(groupA.groupId);
     expect(storesA).toHaveLength(1);
