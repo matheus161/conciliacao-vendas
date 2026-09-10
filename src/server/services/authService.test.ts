@@ -92,4 +92,105 @@ describe("authService.acceptInvite", () => {
       acceptInvite({ pendingMembershipId: "does-not-exist", password: "outrasenha1" })
     ).rejects.toMatchObject({ code: "INVITE_NOT_FOUND" });
   });
+
+  it("throws INVITE_NOT_FOUND for an expired invite", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+    await db.pendingMembership.update({
+      where: { id: invite.id },
+      data: { expiresAt: new Date(Date.now() - 1000) },
+    });
+
+    await expect(
+      acceptInvite({ pendingMembershipId: invite.id, password: "outrasenha1" })
+    ).rejects.toMatchObject({ code: "INVITE_NOT_FOUND" });
+  });
+
+  it("throws ACCOUNT_EXISTS instead of silently attaching an existing account", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    await signup({
+      email: "operador@franquia.com",
+      password: "senha-original1",
+      groupName: "Outra Franquia",
+    });
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+
+    await expect(
+      acceptInvite({ pendingMembershipId: invite.id, password: "senha-forcada-pelo-atacante" })
+    ).rejects.toMatchObject({ code: "ACCOUNT_EXISTS" });
+
+    const membership = await db.membership.findFirst({ where: { groupId, user: { email: "operador@franquia.com" } } });
+    expect(membership).toBeNull();
+
+    const stillPending = await db.pendingMembership.findUnique({ where: { id: invite.id } });
+    expect(stillPending).not.toBeNull();
+  });
+});
+
+import { acceptInviteForExistingUser } from "./authService";
+
+describe("authService.acceptInviteForExistingUser", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("attaches the invited role to the already-authenticated matching user", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const { userId } = await signup({
+      email: "operador@franquia.com",
+      password: "senha-original1",
+      groupName: "Outra Franquia",
+    });
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+
+    const result = await acceptInviteForExistingUser({ pendingMembershipId: invite.id, userId });
+
+    expect(result.groupId).toBe(groupId);
+    expect(result.role).toBe("operator");
+
+    const remaining = await db.pendingMembership.findUnique({ where: { id: invite.id } });
+    expect(remaining).toBeNull();
+  });
+
+  it("throws INVITE_NOT_FOUND when the authenticated user's e-mail does not match the invite", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const { userId: outroUserId } = await signup({
+      email: "outra-pessoa@franquia.com",
+      password: "senha-original1",
+      groupName: "Outra Franquia",
+    });
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+
+    await expect(
+      acceptInviteForExistingUser({ pendingMembershipId: invite.id, userId: outroUserId })
+    ).rejects.toMatchObject({ code: "INVITE_NOT_FOUND" });
+  });
+
+  it("throws INVITE_NOT_FOUND for an unknown invite", async () => {
+    const { userId } = await signup({
+      email: "operador@franquia.com",
+      password: "senha-original1",
+      groupName: "Outra Franquia",
+    });
+
+    await expect(
+      acceptInviteForExistingUser({ pendingMembershipId: "does-not-exist", userId })
+    ).rejects.toMatchObject({ code: "INVITE_NOT_FOUND" });
+  });
 });

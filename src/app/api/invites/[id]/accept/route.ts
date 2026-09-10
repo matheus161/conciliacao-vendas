@@ -28,6 +28,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (err instanceof AuthError && err.code === "INVITE_NOT_FOUND") {
       return NextResponse.json({ error: "INVITE_NOT_FOUND" }, { status: 404 });
     }
+    if (err instanceof AuthError && err.code === "ACCOUNT_EXISTS") {
+      return NextResponse.json({ error: "ACCOUNT_EXISTS" }, { status: 409 });
+    }
     throw err;
   }
 }

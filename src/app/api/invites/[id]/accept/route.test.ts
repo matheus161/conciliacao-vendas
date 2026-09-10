@@ -38,4 +38,25 @@ describe("POST /api/invites/[id]/accept", () => {
     const res = await POST(req, { params: { id: "does-not-exist" } });
     expect(res.status).toBe(404);
   });
+
+  it("returns 409 when the invited e-mail already has an account", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    await signup({ email: "op@franquia.com", password: "senha-original1", groupName: "Outra" });
+    const invite = await inviteMember(groupId, { email: "op@franquia.com", role: "operator" });
+
+    const req = new NextRequest(`http://localhost/api/invites/${invite.id}/accept`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ password: "senha-forcada-pelo-atacante" }),
+    });
+    const res = await POST(req, { params: { id: invite.id } });
+
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.error).toBe("ACCOUNT_EXISTS");
+  });
 });

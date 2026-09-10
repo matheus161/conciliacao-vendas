@@ -1,11 +1,17 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+
+function safeRedirectTarget(next: string | null): string {
+  if (next && /^\/(?!\/)/.test(next) && !next.includes("\\")) return next;
+  return "/dashboard";
+}
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +25,7 @@ export default function LoginPage() {
       body: JSON.stringify({ email, password }),
     });
     if (res.status === 200) {
-      router.push("/dashboard");
+      router.push(safeRedirectTarget(searchParams.get("next")));
       return;
     }
     setError("E-mail ou senha incorretos.");
