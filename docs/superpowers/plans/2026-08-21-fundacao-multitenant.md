@@ -2057,75 +2057,44 @@ git commit -m "feat: add dashboard with store and invite management"
 **Files:**
 - None (verification only).
 
-- [ ] **Step 1: Run the full test suite**
+> **Nota (2026-09-12):** o passo a passo original abaixo ficou desatualizado (signup virou 2 etapas incluindo a 1ª loja, dashboard virou 2 telas com rail lateral, restrição de loja por membro foi adicionada). Executado com o fluxo real — ver checklist atualizado.
+
+- [x] **Step 1: Run the full test suite**
 
 Run: `npx vitest run`
-Expected: all test files pass, e.g. `Test Files  11 passed (11)`.
+Resultado: `Test Files  15 passed (15)`, `Tests  64 passed (64)`. `tsc --noEmit` limpo.
 
-- [ ] **Step 2: Run the manual walkthrough**
+- [x] **Step 2: Run the manual walkthrough**
 
-With `docker compose up -d postgres` and `npm run dev` running:
-1. Open `/signup`, create "Franquia Teste" as `admin@teste.com`.
-2. Confirm redirect to `/dashboard` showing the group name and empty stores/members lists.
-3. Add a store named "Loja 1" with code `L1"; confirm it appears in the list after the page refresh triggered by the form.
-4. Generate an invite for `operador@teste.com` as Operador; copy the shown link.
-5. Open the link in an incognito window, set a password, submit.
-6. Confirm redirect to `/dashboard` for the new operator, and that `admin@teste.com`'s dashboard (after refresh) now lists `operador@teste.com` as `operator`.
-7. Log out (`POST /api/auth/logout` via the browser devtools network tab or a temporary logout button) and confirm visiting `/dashboard` redirects to `/login`.
+Com Postgres e `npm run dev` rodando, fluxo completo executado (via requisições HTTP diretas, equivalentes ao que o navegador faria):
+1. `/` sem sessão → redireciona pra `/login`. ✅
+2. Signup em 2 etapas: cria "Franquia Teste Final" (admin) e "Loja 1" na mesma sequência. ✅
+3. `/` com sessão → redireciona pra `/dashboard`. ✅
+4. `/dashboard` mostra "Loja 1", banner de período de teste, nome do grupo. ✅
+5. Admin adiciona "Loja 2" pelo form. ✅
+6. Gera convite pro operador; `/join/[id]` mostra o form de criar senha com o nome do grupo certo. ✅
+7. Convite aceito (senha criada), redireciona com sessão nova. ✅
+8. `/dashboard/pessoas` do admin já lista o novo operador. ✅
+9. Antes de restringir, operador vê as 2 lojas via `GET /api/stores`. ✅
+10. Admin restringe o operador só à Loja 1 (`PUT /api/memberships/[id]/stores`) — rejeita loja de outro grupo com 400, confirmando a validação. ✅
+11. Depois de restringir, operador só vê Loja 1. ✅
+12. Logout do operador; `/dashboard` sem sessão → redireciona pra `/login`. ✅
 
-Expected: every step behaves as described, with no unhandled errors in the server console.
+Nenhum erro não tratado no console do servidor.
 
-- [ ] **Step 3: Commit the plan checklist as done**
-
-```bash
-git add docs/superpowers/plans/2026-08-21-fundacao-multitenant.md
-git commit -m "docs: mark fundação multi-tenant plan complete"
-```
+- [x] **Step 3: Commit the plan checklist as done**
 
 ---
 
 ## Considerações futuras (fora do escopo deste plano)
 
-### Restringir operador/atendimento a um subconjunto de lojas
+### Restringir operador/atendimento a um subconjunto de lojas — ✅ implementado (2026-09-12)
 
-Hoje qualquer membership (`admin`, `operator` ou `support`) enxerga todas as lojas do grupo — não existe granularidade por loja. Isso é adequado pro MVP (franquia pequena/média com back-office central cuidando de todas as lojas), mas um dono de grupo pode querer restringir um operador específico (ex: contador terceirizado cuidando só de 2 das 13 lojas) sem dar acesso ao restante.
+Levantado e originalmente registrado aqui como ideia futura; acabou sendo implementado ainda dentro deste plano, antes da Task 16. Resumo do que existe:
 
-Levantado em 2026-09-12, deliberadamente **não** implementado agora — nem a modelagem, nem a UI. Registrado aqui pra ser retomado quando a tela de Pessoas (Task 15) ou um plano futuro revisitar gestão de membership.
+- **Schema**: `MembershipStore` (join `membershipId` + `storeId`, `onDelete: Cascade`, `@@unique([membershipId, storeId])`) em `prisma/schema.prisma`.
+- **Semântica** (default-allow, opt-in pra restringir): sem nenhuma linha = sem restrição (comportamento padrão, preservado pra todo membership pré-existente); com uma ou mais linhas = só enxerga aquelas lojas; `admin` nunca é restringido.
+- **Leitura**: `getAccessibleStoreIds(userId, groupId)` em `membershipService.ts`; `listStores(groupId, accessibleStoreIds?)` filtra no banco quando não é `"all"`. Plugado em `GET /api/stores`, no rail (`dashboard/layout.tsx`) e na tabela de "Todas as lojas" (`dashboard/page.tsx`).
+- **Gestão**: `getStoreAssignmentIds` / `setStoreAssignments` em `membershipService.ts`; `PUT /api/memberships/[id]/stores` (admin-only, valida que as lojas pertencem ao grupo do membership); UI (`StoreAssignmentControl`) na tela de Pessoas (`dashboard/pessoas/`).
 
-**Modelo proposto**, desenhado pra não quebrar nenhum membership existente:
-
-```prisma
-model MembershipStore {
-  id           String     @id @default(cuid())
-  membershipId String
-  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
-  storeId      String
-  store        Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  createdAt    DateTime   @default(now())
-
-  @@unique([membershipId, storeId])
-}
-```
-
-Semântica (default-allow, opt-in pra restringir):
-- **Sem nenhuma linha** pra um membership → sem restrição, vê todas as lojas do grupo (comportamento de hoje, preservado pra todo mundo que já existe).
-- **Com uma ou mais linhas** → só enxerga aquelas lojas específicas.
-- **`admin` nunca é restringido**, independente de ter linha ou não.
-
-Helper proposto em `membershipService.ts`:
-
-```ts
-export async function getAccessibleStoreIds(userId: string, groupId: string): Promise<string[] | "all"> {
-  const membership = await db.membership.findUnique({ where: { userId_groupId: { userId, groupId } } });
-  if (!membership) return [];
-  if (membership.role === "admin") return "all";
-
-  const assignments = await db.membershipStore.findMany({
-    where: { membershipId: membership.id },
-    select: { storeId: true },
-  });
-  return assignments.length === 0 ? "all" : assignments.map((a) => a.storeId);
-}
-```
-
-`listStores` (e, nos planos futuros, qualquer dado por loja — transações, chamados, relatórios) passaria a filtrar por isso quando o retorno não for `"all"`. A UI de atribuição (multi-select "quais lojas essa pessoa vê" ao convidar/editar um operador/atendimento, vazio = todas) entraria na tela de Pessoas.
+Ainda fora de escopo (não pedido, não construído): hierarquia de gerentes regionais pra franquias muito grandes — o padrão atual (lista fixa de lojas por membership) resolve o caso de uso real que motivou isso; uma estrutura de "regiões" seria um passo além, só se/quando fizer sentido pro tamanho de cliente do produto.
