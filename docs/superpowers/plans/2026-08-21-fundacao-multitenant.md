@@ -2073,3 +2073,51 @@ Expected: every step behaves as described, with no unhandled errors in the serve
 git add docs/superpowers/plans/2026-08-21-fundacao-multitenant.md
 git commit -m "docs: mark fundação multi-tenant plan complete"
 ```
+
+---
+
+## Considerações futuras (fora do escopo deste plano)
+
+### Restringir operador/atendimento a um subconjunto de lojas
+
+Hoje qualquer membership (`admin`, `operator` ou `support`) enxerga todas as lojas do grupo — não existe granularidade por loja. Isso é adequado pro MVP (franquia pequena/média com back-office central cuidando de todas as lojas), mas um dono de grupo pode querer restringir um operador específico (ex: contador terceirizado cuidando só de 2 das 13 lojas) sem dar acesso ao restante.
+
+Levantado em 2026-09-12, deliberadamente **não** implementado agora — nem a modelagem, nem a UI. Registrado aqui pra ser retomado quando a tela de Pessoas (Task 15) ou um plano futuro revisitar gestão de membership.
+
+**Modelo proposto**, desenhado pra não quebrar nenhum membership existente:
+
+```prisma
+model MembershipStore {
+  id           String     @id @default(cuid())
+  membershipId String
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  storeId      String
+  store        Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([membershipId, storeId])
+}
+```
+
+Semântica (default-allow, opt-in pra restringir):
+- **Sem nenhuma linha** pra um membership → sem restrição, vê todas as lojas do grupo (comportamento de hoje, preservado pra todo mundo que já existe).
+- **Com uma ou mais linhas** → só enxerga aquelas lojas específicas.
+- **`admin` nunca é restringido**, independente de ter linha ou não.
+
+Helper proposto em `membershipService.ts`:
+
+```ts
+export async function getAccessibleStoreIds(userId: string, groupId: string): Promise<string[] | "all"> {
+  const membership = await db.membership.findUnique({ where: { userId_groupId: { userId, groupId } } });
+  if (!membership) return [];
+  if (membership.role === "admin") return "all";
+
+  const assignments = await db.membershipStore.findMany({
+    where: { membershipId: membership.id },
+    select: { storeId: true },
+  });
+  return assignments.length === 0 ? "all" : assignments.map((a) => a.storeId);
+}
+```
+
+`listStores` (e, nos planos futuros, qualquer dado por loja — transações, chamados, relatórios) passaria a filtrar por isso quando o retorno não for `"all"`. A UI de atribuição (multi-select "quais lojas essa pessoa vê" ao convidar/editar um operador/atendimento, vazio = todas) entraria na tela de Pessoas.

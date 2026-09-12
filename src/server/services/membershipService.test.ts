@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "../../../tests/helpers/resetDb";
-import { signup } from "./authService";
+import { signup, acceptInvite } from "./authService";
+import { createStore } from "./groupService";
 import {
   getMembershipRole,
   listMembers,
   inviteMember,
   getInvitePreview,
+  getAccessibleStoreIds,
 } from "./membershipService";
 
 describe("membershipService", () => {
@@ -107,5 +109,67 @@ describe("membershipService", () => {
     });
 
     expect(await getInvitePreview(invite.id)).toBeNull();
+  });
+});
+
+describe("getAccessibleStoreIds", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("returns 'all' for the admin, ignoring any store assignment rows", async () => {
+    const { userId, groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const store = await createStore(groupId, { name: "Loja Centro", code: "CTR", city: "Belém, PA" });
+    const membership = await db.membership.findUniqueOrThrow({
+      where: { userId_groupId: { userId, groupId } },
+    });
+    await db.membershipStore.create({ data: { membershipId: membership.id, storeId: store.id } });
+
+    expect(await getAccessibleStoreIds(userId, groupId)).toBe("all");
+  });
+
+  it("returns 'all' for a member with no store assignment rows", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+    const { userId } = await acceptInvite({ pendingMembershipId: invite.id, password: "outrasenha123" });
+
+    expect(await getAccessibleStoreIds(userId, groupId)).toBe("all");
+  });
+
+  it("returns only the assigned store ids for a restricted member", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const storeA = await createStore(groupId, { name: "Loja A", code: "A1", city: "Belém, PA" });
+    await createStore(groupId, { name: "Loja B", code: "B1", city: "Belém, PA" });
+
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+    const { userId } = await acceptInvite({ pendingMembershipId: invite.id, password: "outrasenha123" });
+    const membership = await db.membership.findUniqueOrThrow({
+      where: { userId_groupId: { userId, groupId } },
+    });
+    await db.membershipStore.create({ data: { membershipId: membership.id, storeId: storeA.id } });
+
+    expect(await getAccessibleStoreIds(userId, groupId)).toEqual([storeA.id]);
+  });
+
+  it("returns an empty array for a user with no membership in the group", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+
+    expect(await getAccessibleStoreIds("nonexistent-user", groupId)).toEqual([]);
   });
 });

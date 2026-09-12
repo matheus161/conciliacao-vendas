@@ -54,3 +54,21 @@ export async function getInvitePreview(id: string): Promise<InvitePreview | null
     hasAccount: !!existingUser,
   };
 }
+
+/**
+ * Which stores a member can see within the group. "all" means unrestricted (the default —
+ * no MembershipStore rows for the membership) or the admin role, which is never restricted.
+ */
+export async function getAccessibleStoreIds(userId: string, groupId: string): Promise<string[] | "all"> {
+  const membership = await db.membership.findUnique({
+    where: { userId_groupId: { userId, groupId } },
+  });
+  if (!membership) return [];
+  if (membership.role === "admin") return "all";
+
+  const assignments = await db.membershipStore.findMany({
+    where: { membershipId: membership.id },
+    select: { storeId: true },
+  });
+  return assignments.length === 0 ? "all" : assignments.map((a) => a.storeId);
+}

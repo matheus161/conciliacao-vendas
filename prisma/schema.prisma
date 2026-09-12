@@ -27,27 +27,44 @@ model Group {
 }
 
 model Store {
-  id        String   @id @default(cuid())
-  groupId   String
-  group     Group    @relation(fields: [groupId], references: [id])
-  name      String
-  code      String
-  city      String
-  createdAt DateTime @default(now())
+  id                     String            @id @default(cuid())
+  groupId                String
+  group                  Group             @relation(fields: [groupId], references: [id])
+  name                   String
+  code                   String
+  city                   String
+  createdAt              DateTime          @default(now())
+  membershipAssignments  MembershipStore[]
 
   @@unique([groupId, code])
 }
 
 model Membership {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  groupId   String
-  group     Group    @relation(fields: [groupId], references: [id])
-  role      String
-  createdAt DateTime @default(now())
+  id               String            @id @default(cuid())
+  userId           String
+  user             User              @relation(fields: [userId], references: [id])
+  groupId          String
+  group            Group             @relation(fields: [groupId], references: [id])
+  role             String
+  createdAt        DateTime          @default(now())
+  storeAssignments MembershipStore[]
 
   @@unique([userId, groupId])
+}
+
+// Optional per-store restriction for a membership. No rows = unrestricted (sees every
+// store in the group) — this is the default for every membership today, so adding this
+// table changes nothing until an admin explicitly assigns stores to someone. See
+// "Considerações futuras" in docs/superpowers/plans/2026-08-21-fundacao-multitenant.md.
+model MembershipStore {
+  id           String     @id @default(cuid())
+  membershipId String
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  storeId      String
+  store        Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([membershipId, storeId])
 }
 
 model PendingMembership {
