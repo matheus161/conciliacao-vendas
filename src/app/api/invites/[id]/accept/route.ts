@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { acceptInvite, AuthError } from "@/server/services/authService";
 import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
-const acceptSchema = z.object({ password: z.string().min(8) });
+const acceptSchema = z.object({ password: z.string().min(10) });
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const body = await req.json();

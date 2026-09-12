@@ -5,7 +5,7 @@ import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
 const signupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(10),
   groupName: z.string().min(2),
 });
 

@@ -35,8 +35,8 @@ export function AcceptInviteForm({ inviteId }: { inviteId: string }) {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
-        minLength={8}
-        hint="Mínimo de 8 caracteres"
+        minLength={10}
+        hint="Mínimo de 10 caracteres"
       />
 
       <FormError message={error} />
