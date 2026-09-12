@@ -1858,10 +1858,18 @@ git commit -m "feat: add invite acceptance page"
 
 ### Task 15: UI — dashboard (stores, members, forms)
 
+> **Revisão (2026-09-12):** o escopo abaixo (uma página só, lista simples) foi a versão inicial, escrita antes do protótipo de UI existir. Está superada — segue o desenho real:
+>
+> - A "dashboard" corresponde a duas telas do protótipo (`docs/superpowers/specs/2026-09-08-katalagge-ui-design.md`), cada uma com sua rota: `/dashboard` = **"Visão do grupo"** ("Todas as lojas") e `/dashboard/pessoas` = **"Pessoas"**. Um `layout.tsx` compartilhado dá o topbar + rail lateral (menu com ícones, incluindo os itens de telas futuras — Inconsistências, Relatório, Enviar planilha, Fontes de dados, Faturas — desabilitados/"em breve" até os planos que os implementam existirem).
+> - `/dashboard` segue o protótipo por completo: banner de status da assinatura, scoreboard de conciliação do mês, e a tabela "Como cada loja está" com paginação — não só a lista simples de nome/código.
+> - **Sem dado real de conciliação/faturamento ainda** (isso é dos planos de ingestão/reconciliação/faturamento, não escritos): a estrutura visual é implementada de qualquer forma, mas com estado vazio honesto em vez de número fabricado — cada loja aparece como "sem fonte conectada" (`—` nas colunas + pill "Conectar fonte", que é literalmente verdade hoje), e o scoreboard mostra uma mensagem de estado vazio em vez de zeros fingindo cálculo. Nunca inventar valor de negócio (ex.: valor de fatura, contagem de vendas) que não vem de dado real.
+
 **Files:**
-- Create: `src/app/dashboard/page.tsx`
+- Create: `src/app/dashboard/layout.tsx` (topbar + rail — `Rail` component)
+- Create: `src/app/dashboard/page.tsx` ("Visão do grupo")
 - Create: `src/app/dashboard/StoreForm.tsx`
-- Create: `src/app/dashboard/InviteForm.tsx`
+- Create: `src/app/dashboard/pessoas/page.tsx` ("Pessoas")
+- Create: `src/app/dashboard/pessoas/InviteForm.tsx`
 
 **Interfaces:**
 - Consumes: `verifySessionToken`, `SESSION_COOKIE_NAME` (Task 3); `db` (Task 4); `listMembers` (Task 6); `listStores` (Task 8); `POST /api/stores` (Task 11); `POST /api/invites` (Task 10).

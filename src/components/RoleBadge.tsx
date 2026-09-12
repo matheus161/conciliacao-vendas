@@ -1,6 +1,6 @@
 import type { MemberRole } from "@/server/services/membershipService";
 
-const ROLE_LABEL: Record<MemberRole, string> = {
+export const ROLE_LABEL: Record<MemberRole, string> = {
   admin: "Admin",
   operator: "Operador",
   support: "Atendimento",

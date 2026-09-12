@@ -23,4 +23,13 @@ describe("middleware", () => {
     const res = await middleware(req);
     expect(res.status).toBe(200);
   });
+
+  it("marks authenticated responses as not cacheable, so a stale copy is never served after logout", async () => {
+    const token = await createSessionToken({ userId: "user_1", email: "a@b.com" });
+    const req = new NextRequest("http://localhost/dashboard", {
+      headers: { cookie: `${SESSION_COOKIE_NAME}=${token}` },
+    });
+    const res = await middleware(req);
+    expect(res.headers.get("cache-control")).toBe("no-store");
+  });
 });
