@@ -2,6 +2,9 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Field } from "@/components/Field";
+import { Button } from "@/components/Button";
+import { FormError } from "@/components/FormError";
 
 export function AcceptInviteForm({ inviteId }: { inviteId: string }) {
   const router = useRouter();
@@ -25,12 +28,22 @@ export function AcceptInviteForm({ inviteId }: { inviteId: string }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label>
-        Crie uma senha
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
-      </label>
-      {error && <p role="alert">{error}</p>}
-      <button type="submit">Entrar</button>
+      <Field
+        id="conviteSenha"
+        label="Criar senha"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        minLength={8}
+        hint="Mínimo de 8 caracteres"
+      />
+
+      <FormError message={error} />
+
+      <Button block type="submit">
+        Aceitar convite
+      </Button>
     </form>
   );
 }

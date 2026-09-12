@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/Button";
+import { FormError } from "@/components/FormError";
 
 export function ConfirmJoinButton({ inviteId }: { inviteId: string }) {
   const router = useRouter();
@@ -22,10 +24,10 @@ export function ConfirmJoinButton({ inviteId }: { inviteId: string }) {
 
   return (
     <div>
-      <button type="button" onClick={handleClick} disabled={loading}>
-        Confirmar entrada
-      </button>
-      {error && <p role="alert">{error}</p>}
+      <Button block type="button" onClick={handleClick} disabled={loading}>
+        {loading ? "Confirmando…" : "Confirmar entrada"}
+      </Button>
+      <FormError message={error} />
     </div>
   );
 }

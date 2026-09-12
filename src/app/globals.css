@@ -7,9 +7,12 @@
   --rule: rgba(28, 43, 58, 0.14);
   --rule-strong: rgba(28, 43, 58, 0.24);
   --brass: #be6a1e;
+  --brass-soft: rgba(190, 106, 30, 0.16);
   --brass-ink: #6e3d10;
   --good: #2f6e52;
+  --good-soft: rgba(47, 110, 82, 0.13);
   --bad: #a63f32;
+  --bad-soft: rgba(166, 63, 50, 0.13);
 }
 
 * {
@@ -265,6 +268,13 @@ input {
   background: linear-gradient(180deg, #c3701d 0%, #8f4710 100%);
 }
 
+.btn-primary:disabled {
+  background: var(--rule-strong);
+  color: var(--ink-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
 .btn-block {
   width: 100%;
   margin-top: 6px;
@@ -281,4 +291,68 @@ input {
   color: var(--brass-ink);
   font-weight: 600;
   text-decoration: none;
+}
+
+/* ---- status pills (role, state) ---- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pill.brass {
+  background: var(--brass-soft);
+  color: var(--brass-ink);
+}
+
+.pill.good {
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+/* ---- invite context (join page) ---- */
+.invite-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+/* ---- inline notice / callout ---- */
+.notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notice strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.notice a {
+  color: inherit;
+  font-weight: 600;
+}
+
+.notice-brass {
+  background: var(--brass-soft);
+  color: var(--brass-ink);
+}
+
+.notice-bad {
+  background: var(--bad-soft);
+  color: var(--bad);
 }

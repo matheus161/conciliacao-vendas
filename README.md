@@ -10,6 +10,10 @@ Modelo: cada cliente (Grupo, ex: uma franquia) tem múltiplas lojas, cadastro p�
 
 Detalhes completos do produto em `docs/superpowers/specs/2026-08-21-conciliacao-saas-design.md`. Plano de implementação da fundação multi-tenant em `docs/superpowers/plans/2026-08-21-fundacao-multitenant.md`.
 
+## Backlog / próximos passos
+
+- **Login com Google (OAuth)**, pra facilitar o cadastro/entrada. Tecnicamente viável (Auth.js ou fluxo OAuth2 manual, reaproveitando `User`/`Membership`), mas contraria a Global Constraint atual do plano de fundação ("Auth is implemented in-app... no third-party auth vendor for this phase") — decisão deliberada de manter simples nessa fase, não descuido. Reavaliar quando a fundação estiver completa.
+
 ## Stack
 
 Next.js 14 (App Router) + TypeScript, Prisma + PostgreSQL, bcryptjs (hash de senha), jose (sessão JWT), zod (validação), Vitest (testes).

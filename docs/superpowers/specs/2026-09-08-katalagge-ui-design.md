@@ -8,10 +8,11 @@ Este link é a referência visual e de interação para qualquer implementação
 
 ## O que o protótipo cobre
 
-12 telas, desktop e mobile (toggle "Computador"/"Celular" na própria página):
+13 telas, desktop e mobile (toggle "Computador"/"Celular" na própria página):
 
 - Entrar (login)
 - Cadastro — Criar grupo (1/2) e Adicionar loja (2/2) — sem etapa de fonte de dados no cadastro
+- Aceitar convite (`/join/[id]`) — os 3 estados possíveis (sem conta / mesmo e-mail já logado / outro e-mail logado) num só toggle de exemplo
 - Visão do grupo (hero/scoreboard + ledger de lojas paginado + tendência)
 - Visão da loja
 - Pessoas (membros ativos + convites pendentes, ambos paginados)
