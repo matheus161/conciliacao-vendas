@@ -10,9 +10,47 @@ Modelo: cada cliente (Grupo, ex: uma franquia) tem múltiplas lojas, cadastro p�
 
 Detalhes completos do produto em `docs/superpowers/specs/2026-08-21-conciliacao-saas-design.md`. Plano de implementação da fundação multi-tenant em `docs/superpowers/plans/2026-08-21-fundacao-multitenant.md`.
 
+## Backlog / próximos passos
+
+- **Login com Google (OAuth)**, pra facilitar o cadastro/entrada. Tecnicamente viável (Auth.js ou fluxo OAuth2 manual, reaproveitando `User`/`Membership`), mas contraria a Global Constraint atual do plano de fundação ("Auth is implemented in-app... no third-party auth vendor for this phase") — decisão deliberada de manter simples nessa fase, não descuido. Reavaliar quando a fundação estiver completa.
+
 ## Stack
 
 Next.js 14 (App Router) + TypeScript, Prisma + PostgreSQL, bcryptjs (hash de senha), jose (sessão JWT), zod (validação), Vitest (testes).
+
+## Convenções de rotas de API protegidas
+
+Route Handlers (`route.ts`) são a camada de controller do Next.js: fazem autenticação, validação (zod) e mapeamento de status HTTP, e delegam a lógica de negócio para a camada de service em `src/server/services/`. Duas utilidades em `src/lib/auth/` cobrem o que se repete entre rotas:
+
+- **`withAuth(handler)`** ([withAuth.ts](src/lib/auth/withAuth.ts)) — envolve o handler, extrai a sessão do cookie e responde `401` automaticamente se não houver sessão válida. O handler recebe `(req, session)` já autenticado.
+- **`requireRole(userId, groupId, role?)`** ([requireRole.ts](src/lib/auth/requireRole.ts)) — checa se o usuário é membro do grupo (e, opcionalmente, se tem um `role` específico como `"admin"`); devolve uma `NextResponse` `403` ou `null`. Só é chamado depois que o `groupId` já foi extraído (query string ou body validado), por isso não faz parte do `withAuth`.
+
+Padrão pra novas rotas autenticadas:
+
+```ts
+export const POST = withAuth(async (req, session) => {
+  const parsed = mySchema.safeParse(await req.json());
+  if (!parsed.success) return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
+
+  const forbidden = await requireRole(session.userId, parsed.data.groupId, "admin");
+  if (forbidden) return forbidden;
+
+  // lógica de negócio via services/...
+});
+```
+
+Ver exemplos em `src/app/api/stores/route.ts` e `src/app/api/invites/route.ts`.
+
+## Convenções de componentes de UI
+
+Padrões de tela que se repetem viram componente em `src/components/` em vez de serem copiados entre páginas. Hoje existem:
+
+- **`Button`** — `.btn .btn-primary`, com variante `block`.
+- **`Field`** — par label+input, com `hint` opcional.
+- **`FormError`** — mensagem de erro condicional (`role="alert"`).
+- **`OnboardShell`** — wrapper de marca (`.onboard`/`.onboard-wrap`/`.onboard-brand`) das telas de onboarding (login, signup).
+
+Ao construir ou alterar uma tela, prefira esses componentes existentes a reescrever o HTML/CSS na mão. Se um padrão novo aparecer repetido (mesma estrutura em 2+ lugares, ou claramente vai se repetir — ex: numa próxima tela do fluxo), extraia um componente novo em vez de duplicar; não é necessário esperar a terceira repetição.
 
 ## Como rodar
 
