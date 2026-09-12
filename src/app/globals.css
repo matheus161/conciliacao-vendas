@@ -964,6 +964,27 @@ a.rail-nav-item:hover {
   font-size: 14px;
 }
 
+/* ---- per-member store assignment (Pessoas) ---- */
+.store-assignment {
+  padding: 0 0 16px;
+  margin-top: -6px;
+}
+
+.store-assignment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 8px 0 10px;
+}
+
+.store-assignment-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
 /* ---- inline notice / callout ---- */
 .notice {
   display: flex;

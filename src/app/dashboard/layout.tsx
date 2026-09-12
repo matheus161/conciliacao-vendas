@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { listStores } from "@/server/services/groupService";
+import { getAccessibleStoreIds } from "@/server/services/membershipService";
 import { ROLE_LABEL } from "@/components/RoleBadge";
 import { LogoutButton } from "@/components/LogoutButton";
 import { Rail } from "@/components/Rail";
@@ -19,7 +20,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   });
   if (!membership) redirect("/login");
 
-  const stores = await listStores(membership.groupId);
+  const accessible = await getAccessibleStoreIds(session.userId, membership.groupId);
+  const stores = await listStores(membership.groupId, accessible);
 
   return (
     <div className="authed-shell">

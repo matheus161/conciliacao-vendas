@@ -9,6 +9,8 @@ import {
   inviteMember,
   getInvitePreview,
   getAccessibleStoreIds,
+  getStoreAssignmentIds,
+  setStoreAssignments,
 } from "./membershipService";
 
 describe("membershipService", () => {
@@ -171,5 +173,51 @@ describe("getAccessibleStoreIds", () => {
     });
 
     expect(await getAccessibleStoreIds("nonexistent-user", groupId)).toEqual([]);
+  });
+});
+
+describe("store assignments", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("returns an empty list for a membership with no assignments", async () => {
+    const { userId, groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const membership = await db.membership.findUniqueOrThrow({
+      where: { userId_groupId: { userId, groupId } },
+    });
+
+    expect(await getStoreAssignmentIds(membership.id)).toEqual([]);
+  });
+
+  it("sets, overwrites, and clears store assignments for a membership", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const storeA = await createStore(groupId, { name: "Loja A", code: "A1", city: "Belém, PA" });
+    const storeB = await createStore(groupId, { name: "Loja B", code: "B1", city: "Belém, PA" });
+
+    const invite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+    const { userId } = await acceptInvite({ pendingMembershipId: invite.id, password: "outrasenha123" });
+    const membership = await db.membership.findUniqueOrThrow({
+      where: { userId_groupId: { userId, groupId } },
+    });
+
+    await setStoreAssignments(membership.id, [storeA.id, storeB.id]);
+    expect(await getStoreAssignmentIds(membership.id)).toEqual(
+      expect.arrayContaining([storeA.id, storeB.id])
+    );
+
+    await setStoreAssignments(membership.id, [storeA.id]);
+    expect(await getStoreAssignmentIds(membership.id)).toEqual([storeA.id]);
+
+    await setStoreAssignments(membership.id, []);
+    expect(await getStoreAssignmentIds(membership.id)).toEqual([]);
   });
 });

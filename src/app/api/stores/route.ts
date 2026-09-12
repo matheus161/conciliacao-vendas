@@ -3,6 +3,7 @@ import { z } from "zod";
 import { withAuth } from "@/lib/auth/withAuth";
 import { requireRole } from "@/lib/auth/requireRole";
 import { createStore, listStores } from "@/server/services/groupService";
+import { getAccessibleStoreIds } from "@/server/services/membershipService";
 
 const createStoreSchema = z.object({
   groupId: z.string().min(1),
@@ -18,7 +19,8 @@ export const GET = withAuth(async (req, session) => {
   const forbidden = await requireRole(session.userId, groupId);
   if (forbidden) return forbidden;
 
-  const stores = await listStores(groupId);
+  const accessible = await getAccessibleStoreIds(session.userId, groupId);
+  const stores = await listStores(groupId, accessible);
   return NextResponse.json(stores, { status: 200 });
 });
 

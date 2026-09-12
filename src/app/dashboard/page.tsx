@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { listStores } from "@/server/services/groupService";
+import { getAccessibleStoreIds } from "@/server/services/membershipService";
 import { StoreForm } from "./StoreForm";
 
 const PAGE_SIZE = 5;
@@ -23,7 +24,8 @@ export default async function DashboardPage({
   });
   if (!membership) redirect("/login");
 
-  const stores = await listStores(membership.groupId);
+  const accessible = await getAccessibleStoreIds(session.userId, membership.groupId);
+  const stores = await listStores(membership.groupId, accessible);
   const isAdmin = membership.role === "admin";
 
   const requestedPage = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);

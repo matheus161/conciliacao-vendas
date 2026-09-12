@@ -33,4 +33,30 @@ describe("groupService", () => {
     expect(storesA).toHaveLength(1);
     expect(storesA[0].name).toBe("Loja A");
   });
+
+  it("filters by the given accessible store ids when not 'all'", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const storeA = await createStore(groupId, { name: "Loja A", code: "A1", city: "Belém, PA" });
+    await createStore(groupId, { name: "Loja B", code: "B1", city: "Belém, PA" });
+
+    const stores = await listStores(groupId, [storeA.id]);
+    expect(stores).toEqual([storeA]);
+  });
+
+  it("returns every store in the group when accessible ids is 'all'", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    await createStore(groupId, { name: "Loja A", code: "A1", city: "Belém, PA" });
+    await createStore(groupId, { name: "Loja B", code: "B1", city: "Belém, PA" });
+
+    const stores = await listStores(groupId, "all");
+    expect(stores).toHaveLength(2);
+  });
 });

@@ -72,3 +72,18 @@ export async function getAccessibleStoreIds(userId: string, groupId: string): Pr
   });
   return assignments.length === 0 ? "all" : assignments.map((a) => a.storeId);
 }
+
+export async function getStoreAssignmentIds(membershipId: string): Promise<string[]> {
+  const rows = await db.membershipStore.findMany({
+    where: { membershipId },
+    select: { storeId: true },
+  });
+  return rows.map((r) => r.storeId);
+}
+
+export async function setStoreAssignments(membershipId: string, storeIds: string[]): Promise<void> {
+  await db.$transaction([
+    db.membershipStore.deleteMany({ where: { membershipId } }),
+    db.membershipStore.createMany({ data: storeIds.map((storeId) => ({ membershipId, storeId })) }),
+  ]);
+}
