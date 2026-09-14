@@ -8,6 +8,7 @@ import { getAccessibleStoreIds } from "@/server/services/membershipService";
 import { ROLE_LABEL } from "@/components/RoleBadge";
 import { LogoutButton } from "@/components/LogoutButton";
 import { Rail } from "@/components/Rail";
+import { subscriptionStatusLabel } from "@/lib/subscriptionStatus";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const token = cookies().get(SESSION_COOKIE_NAME)?.value;
@@ -28,6 +29,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <div className="topbar">
         <div className="topbar-brand">
           <span className="topbar-mark">K</span>Katalagge
+        </div>
+        <div className="topbar-billing">
+          <span className="dot" />
+          {subscriptionStatusLabel(membership.group.subscriptionStatus)}
         </div>
         <div className="topbar-profile">
           <div className="topbar-avatar">{session.email.slice(0, 2).toUpperCase()}</div>
