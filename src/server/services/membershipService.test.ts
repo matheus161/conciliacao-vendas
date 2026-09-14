@@ -11,6 +11,7 @@ import {
   getAccessibleStoreIds,
   getStoreAssignmentIds,
   setStoreAssignments,
+  listPendingInvites,
 } from "./membershipService";
 
 describe("membershipService", () => {
@@ -219,5 +220,45 @@ describe("store assignments", () => {
 
     await setStoreAssignments(membership.id, []);
     expect(await getStoreAssignmentIds(membership.id)).toEqual([]);
+  });
+});
+
+describe("listPendingInvites", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("lists pending invites for a group, newest first", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+
+    const first = await inviteMember(groupId, { email: "primeiro@franquia.com", role: "operator" });
+    const second = await inviteMember(groupId, { email: "segundo@franquia.com", role: "support" });
+
+    const pending = await listPendingInvites(groupId);
+    expect(pending.map((p) => p.id)).toEqual([second.id, first.id]);
+    expect(pending[0]).toMatchObject({ email: "segundo@franquia.com", role: "support" });
+  });
+
+  it("excludes accepted invites and invites from another group", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const other = await signup({
+      email: "admin2@outra.com",
+      password: "supersecret1",
+      groupName: "Outra Franquia",
+    });
+
+    const toAccept = await inviteMember(groupId, { email: "aceito@franquia.com", role: "operator" });
+    await acceptInvite({ pendingMembershipId: toAccept.id, password: "outrasenha123" });
+    await inviteMember(other.groupId, { email: "outro@outra.com", role: "operator" });
+
+    expect(await listPendingInvites(groupId)).toEqual([]);
   });
 });

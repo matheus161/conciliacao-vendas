@@ -87,3 +87,13 @@ export async function setStoreAssignments(membershipId: string, storeIds: string
     db.membershipStore.createMany({ data: storeIds.map((storeId) => ({ membershipId, storeId })) }),
   ]);
 }
+
+export type PendingInviteSummary = { id: string; email: string; role: MemberRole; createdAt: Date };
+
+export async function listPendingInvites(groupId: string): Promise<PendingInviteSummary[]> {
+  const pending = await db.pendingMembership.findMany({
+    where: { groupId },
+    orderBy: { createdAt: "desc" },
+  });
+  return pending.map((p) => ({ id: p.id, email: p.email, role: p.role as MemberRole, createdAt: p.createdAt }));
+}
