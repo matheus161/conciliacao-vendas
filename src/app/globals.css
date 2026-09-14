@@ -336,6 +336,22 @@ input {
   color: var(--good);
 }
 
+.pill.example {
+  background: rgba(28, 43, 58, 0.08);
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.example-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 10px;
+}
+
 /* ---- status banner (subscription, alerts) ---- */
 .banner {
   display: flex;
