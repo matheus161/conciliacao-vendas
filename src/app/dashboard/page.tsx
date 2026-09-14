@@ -7,6 +7,8 @@ import { listStores } from "@/server/services/groupService";
 import { getAccessibleStoreIds } from "@/server/services/membershipService";
 import { StoreForm } from "./StoreForm";
 import { StoreRow } from "./StoreRow";
+import { ExampleNote } from "@/components/ExampleNote";
+import { TrendChart } from "./TrendChart";
 
 const PAGE_SIZE = 5;
 
@@ -55,17 +57,32 @@ export default async function DashboardPage({
 
       <div className="scoreboard">
         <div className="scoreboard-head">
-          <div className="scoreboard-title">Conciliação</div>
+          <div className="scoreboard-title">Conciliação de exemplo</div>
         </div>
-        <div className="state-block">
-          <div className="state-icon">📊</div>
-          <h3>Nenhuma conciliação ainda</h3>
-          <p>
-            Vendas, conciliadas e divergências aparecem aqui assim que uma loja tiver uma fonte de dados
-            conectada e a primeira planilha for processada.
-          </p>
+        <div className="score-row">
+          <div className="score-block">
+            <div className="score-num">4.512</div>
+            <div className="score-label">vendas no mês</div>
+            <div className="score-sub">nas 12 lojas com fonte conectada</div>
+          </div>
+          <div className="score-block">
+            <div className="score-num good">4.398</div>
+            <div className="score-label">conciliadas</div>
+            <div className="score-sub">97,5% bateram certinho</div>
+          </div>
+          <div className="score-block">
+            <div className="score-num bad">114</div>
+            <div className="score-label">com divergência</div>
+            <div className="score-sub">18 já viraram chamado em aberto</div>
+          </div>
         </div>
+        <ExampleNote>
+          Os números acima são ilustrativos. A conciliação real chega com o motor de conciliação (plano
+          futuro).
+        </ExampleNote>
       </div>
+
+      <TrendChart />
 
       <div className="panel">
         <div className="panel-head">
