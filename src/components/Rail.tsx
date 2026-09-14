@@ -82,10 +82,10 @@ export function Rail({ groupName, stores }: { groupName: string; stores: RailSto
                 <span className="rail-loja-more">Nenhuma loja ainda</span>
               ) : (
                 stores.map((s) => (
-                  <span className="rail-loja-row" key={s.id}>
+                  <Link className="rail-loja-row" href={`/dashboard/lojas/${s.id}`} key={s.id}>
                     <span className="rail-dot" />
                     <span className="truncate">{s.name}</span>
-                  </span>
+                  </Link>
                 ))
               )}
             </div>

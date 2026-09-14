@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { listStores } from "@/server/services/groupService";
 import { getAccessibleStoreIds } from "@/server/services/membershipService";
 import { StoreForm } from "./StoreForm";
+import { StoreRow } from "./StoreRow";
 
 const PAGE_SIZE = 5;
 
@@ -69,6 +70,7 @@ export default async function DashboardPage({
       <div className="panel">
         <div className="panel-head">
           <h2>Como cada loja está</h2>
+          <div className="panel-head-sub">Toque numa loja pra ver os detalhes</div>
         </div>
         <div className="ledger-scroll">
           <table className="ledger">
@@ -90,7 +92,7 @@ export default async function DashboardPage({
                 </tr>
               ) : (
                 pageStores.map((s) => (
-                  <tr key={s.id}>
+                  <StoreRow storeId={s.id} key={s.id}>
                     <td className="cell-loja">{s.name}</td>
                     <td className="num-col cell-empty">—</td>
                     <td className="num-col cell-empty">—</td>
@@ -98,7 +100,7 @@ export default async function DashboardPage({
                     <td>
                       <span className="pill brass">Conectar fonte</span>
                     </td>
-                  </tr>
+                  </StoreRow>
                 ))
               )}
             </tbody>

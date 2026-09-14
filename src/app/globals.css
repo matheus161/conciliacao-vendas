@@ -542,6 +542,14 @@ table.ledger td.num-col {
   color: var(--ink-muted);
 }
 
+tr.is-linked {
+  cursor: pointer;
+}
+
+tr.is-linked:hover {
+  background: var(--brass-soft);
+}
+
 /* ---- pagination (used on every list/table that can grow) ---- */
 .pager {
   display: flex;
@@ -867,7 +875,13 @@ a.rail-nav-item:hover {
   border-radius: 7px;
   font-size: 13px;
   color: var(--ink-muted);
+  text-decoration: none;
   white-space: nowrap;
+}
+
+a.rail-loja-row:hover {
+  background: rgba(28, 43, 58, 0.05);
+  color: var(--ink);
 }
 
 .rail-loja-more {
