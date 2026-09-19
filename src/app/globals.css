@@ -146,6 +146,12 @@ input {
   border-color: var(--brass);
 }
 
+.field input:disabled {
+  background: var(--paper-deep);
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
 .field-error {
   font-size: 13.5px;
   color: var(--bad);
@@ -291,6 +297,22 @@ input {
   opacity: 0.6;
 }
 
+.btn-bad {
+  background: transparent;
+  color: var(--bad);
+  border-color: var(--bad);
+}
+
+.btn-bad:hover {
+  background: var(--bad-soft);
+}
+
+.btn-bad:disabled {
+  color: var(--ink-muted);
+  border-color: var(--rule-strong);
+  cursor: not-allowed;
+}
+
 .btn-sm {
   padding: 7px 13px;
   font-size: 13.5px;
@@ -334,6 +356,29 @@ input {
 .pill.good {
   background: var(--good-soft);
   color: var(--good);
+}
+
+.pill.example {
+  background: rgba(28, 43, 58, 0.08);
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.pill.muted {
+  background: rgba(28, 43, 58, 0.08);
+  color: var(--ink-muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(28, 43, 58, 0.35);
+}
+
+.example-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 10px;
 }
 
 /* ---- status banner (subscription, alerts) ---- */
@@ -468,6 +513,71 @@ input {
   line-height: 1.5;
 }
 
+/* ---- trend chart (illustrative) ---- */
+.chart-panel {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 2px 12px 12px 12px;
+  position: relative;
+  padding: 26px 24px 20px;
+  box-shadow: 0 1px 2px rgba(20, 30, 40, 0.03), 0 14px 28px -22px rgba(20, 30, 40, 0.32);
+}
+
+.chart-tab {
+  position: absolute;
+  top: -14px;
+  left: 0;
+  background: var(--brass);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px 8px 0 0;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--good);
+}
+
+.chart-hit {
+  cursor: pointer;
+}
+
+.chart-tooltip rect {
+  fill: var(--ink);
+  opacity: 0.95;
+}
+
+.chart-tooltip-month {
+  fill: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-tooltip-value {
+  fill: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 /* ---- ledger table (stores overview) ---- */
 .panel-head-sub {
   font-size: 13px;
@@ -518,12 +628,26 @@ table.ledger td.num-col {
   text-align: right;
 }
 
+table.ledger .actions-col {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .cell-loja {
   font-weight: 600;
 }
 
 .cell-empty {
   color: var(--ink-muted);
+}
+
+tr.is-linked {
+  cursor: pointer;
+}
+
+tr.is-linked:hover {
+  background: var(--brass-soft);
 }
 
 /* ---- pagination (used on every list/table that can grow) ---- */
@@ -571,8 +695,12 @@ table.ledger td.num-col {
   gap: 16px;
   background: linear-gradient(180deg, var(--ink) 0%, #101a23 100%);
   color: #edefea;
-  padding: 12px 24px;
+  height: 58px;
+  padding: 0 24px;
   border-bottom: 3px solid var(--brass);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .topbar-brand {
@@ -598,8 +726,27 @@ table.ledger td.num-col {
   flex-shrink: 0;
 }
 
-.topbar-profile {
+.topbar-billing {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: rgba(237, 239, 234, 0.8);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.topbar-billing .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--good);
+  flex-shrink: 0;
+}
+
+.topbar-profile {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -643,9 +790,13 @@ table.ledger td.num-col {
   width: 250px;
   flex-shrink: 0;
   position: sticky;
-  top: 0;
+  top: 58px;
+  z-index: 5;
   align-self: flex-start;
-  min-height: 100vh;
+  height: calc(100vh - 58px);
+  max-height: calc(100vh - 58px);
+  overflow-y: auto;
+  overflow-x: hidden;
   background: linear-gradient(180deg, #e8ede6 0%, #dce3d9 100%);
   border-right: 1px solid var(--rule);
   box-shadow: inset -10px 0 16px -16px rgba(20, 30, 24, 0.35);
@@ -832,7 +983,13 @@ a.rail-nav-item:hover {
   border-radius: 7px;
   font-size: 13px;
   color: var(--ink-muted);
+  text-decoration: none;
   white-space: nowrap;
+}
+
+a.rail-loja-row:hover {
+  background: rgba(28, 43, 58, 0.05);
+  color: var(--ink);
 }
 
 .rail-loja-more {
@@ -885,12 +1042,26 @@ a.rail-nav-item:hover {
   align-items: center;
   justify-content: center;
   color: var(--ink-muted);
-  font-size: 13px;
 }
 
 .rail-collapse-toggle:hover {
   background: var(--paper-deep);
   color: var(--ink);
+}
+
+.rail-collapse-toggle svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.18s ease;
+}
+
+.rail[data-collapsed="true"] .rail-collapse-toggle svg {
+  transform: rotate(180deg);
 }
 
 .content {
@@ -923,6 +1094,11 @@ a.rail-nav-item:hover {
 }
 
 .panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 16px 20px 12px;
 }
 
@@ -992,8 +1168,15 @@ a.rail-nav-item:hover {
   align-items: flex-start;
   padding: 13px 16px;
   border-radius: 10px;
+  margin-bottom: 16px;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.notice > span {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: break-word;
 }
 
 .notice strong {
@@ -1014,4 +1197,170 @@ a.rail-nav-item:hover {
 .notice-bad {
   background: var(--bad-soft);
   color: var(--bad);
+}
+
+/* ---- modal (add store, etc.) ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 43, 58, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 20;
+  animation: modal-overlay-in 0.15s ease-out;
+}
+
+/* same signature as .onboard-card / .scoreboard: brass top edge, sharp-then-round corners —
+   a modal is another ledger card, not a generic rounded SaaS dialog */
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--brass);
+  border-radius: 4px 4px 14px 14px;
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 1px 2px rgba(20, 30, 40, 0.04), 0 24px 48px -20px rgba(20, 30, 40, 0.45);
+  animation: modal-card-in 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.modal-card:focus {
+  outline: none;
+}
+
+.modal-card:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: -2px;
+}
+
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-card {
+    animation: none;
+  }
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 4px;
+}
+
+.modal-head h2 {
+  font-size: 17px;
+}
+
+.modal-close {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  border-radius: 7px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+.modal-close:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+
+.modal-body {
+  padding: 14px 20px 22px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ---- kebab (row overflow) menu ---- */
+.kebab {
+  position: relative;
+  display: inline-block;
+}
+
+.kebab-trigger {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  background: none;
+  border-radius: 7px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+.kebab-trigger:hover,
+.kebab-trigger[aria-expanded="true"] {
+  background: var(--paper-deep);
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+.kebab-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 168px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 9px;
+  box-shadow: 0 1px 2px rgba(20, 30, 40, 0.04), 0 16px 32px -18px rgba(20, 30, 40, 0.4);
+  padding: 6px;
+  z-index: 10;
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.menu-item:hover {
+  background: var(--paper-deep);
+}
+
+.menu-item-bad {
+  color: var(--bad);
+}
+
+.menu-item-bad:hover {
+  background: var(--bad-soft);
 }

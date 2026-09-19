@@ -16,7 +16,15 @@ function initialsFor(name: string): string {
     .join("");
 }
 
-export function Rail({ groupName, stores }: { groupName: string; stores: RailStore[] }) {
+export function Rail({
+  groupName,
+  stores,
+  isAdmin,
+}: {
+  groupName: string;
+  stores: RailStore[];
+  isAdmin: boolean;
+}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [lojasOpen, setLojasOpen] = useState(false);
@@ -55,15 +63,17 @@ export function Rail({ groupName, stores }: { groupName: string; stores: RailSto
       <div className="rail-divider" />
 
       <nav className="rail-nav">
-        <Link href="/dashboard" className={`rail-nav-item ${pathname === "/dashboard" ? "is-active" : ""}`}>
-          <svg viewBox="0 0 20 20">
-            <rect x="2.5" y="2.5" width="6" height="6" rx="1.3" />
-            <rect x="11.5" y="2.5" width="6" height="6" rx="1.3" />
-            <rect x="2.5" y="11.5" width="6" height="6" rx="1.3" />
-            <rect x="11.5" y="11.5" width="6" height="6" rx="1.3" />
-          </svg>
-          <span className="rail-nav-label">Visão do grupo</span>
-        </Link>
+        {isAdmin && (
+          <Link href="/dashboard" className={`rail-nav-item ${pathname === "/dashboard" ? "is-active" : ""}`}>
+            <svg viewBox="0 0 20 20">
+              <rect x="2.5" y="2.5" width="6" height="6" rx="1.3" />
+              <rect x="11.5" y="2.5" width="6" height="6" rx="1.3" />
+              <rect x="2.5" y="11.5" width="6" height="6" rx="1.3" />
+              <rect x="11.5" y="11.5" width="6" height="6" rx="1.3" />
+            </svg>
+            <span className="rail-nav-label">Visão do grupo</span>
+          </Link>
+        )}
 
         <div className={`rail-accordion ${lojasOpen ? "is-open" : ""}`}>
           <button type="button" className="rail-nav-item rail-accordion-toggle" onClick={() => setLojasOpen((o) => !o)}>
@@ -82,10 +92,10 @@ export function Rail({ groupName, stores }: { groupName: string; stores: RailSto
                 <span className="rail-loja-more">Nenhuma loja ainda</span>
               ) : (
                 stores.map((s) => (
-                  <span className="rail-loja-row" key={s.id}>
+                  <Link className="rail-loja-row" href={`/dashboard/lojas/${s.id}`} key={s.id}>
                     <span className="rail-dot" />
                     <span className="truncate">{s.name}</span>
-                  </span>
+                  </Link>
                 ))
               )}
             </div>
@@ -163,8 +173,11 @@ export function Rail({ groupName, stores }: { groupName: string; stores: RailSto
           type="button"
           onClick={toggleCollapsed}
           title={collapsed ? "Expandir menu" : "Reduzir menu"}
+          aria-label={collapsed ? "Expandir menu" : "Reduzir menu"}
         >
-          {collapsed ? "»" : "«"}
+          <svg viewBox="0 0 20 20">
+            <polyline points="12,4 6,10 12,16" />
+          </svg>
         </button>
       </div>
     </aside>
