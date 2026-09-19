@@ -44,7 +44,9 @@ describe("stores API", () => {
     const listRes = await GET(await authedGet(userId, groupId));
     expect(listRes.status).toBe(200);
     const stores = await listRes.json();
-    expect(stores).toEqual([{ id: expect.any(String), name: "Loja Centro", code: "CTR", city: "Belém, PA" }]);
+    expect(stores).toEqual([
+      { id: expect.any(String), name: "Loja Centro", code: "CTR", city: "Belém, PA", active: true },
+    ]);
   });
 
   it("rejects an unauthenticated request with 401", async () => {

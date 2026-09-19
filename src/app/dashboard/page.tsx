@@ -5,7 +5,8 @@ import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { listStores } from "@/server/services/groupService";
 import { getAccessibleStoreIds } from "@/server/services/membershipService";
-import { StoreForm } from "./StoreForm";
+import { AddStoreButton } from "./AddStoreButton";
+import { StoreActionsMenu } from "./StoreActionsMenu";
 import { StoreRow } from "./StoreRow";
 import { ExampleNote } from "@/components/ExampleNote";
 import { TrendChart } from "./TrendChart";
@@ -26,10 +27,10 @@ export default async function DashboardPage({
     include: { group: true },
   });
   if (!membership) redirect("/login");
+  if (membership.role !== "admin") redirect("/dashboard/pessoas");
 
   const accessible = await getAccessibleStoreIds(session.userId, membership.groupId);
-  const stores = await listStores(membership.groupId, accessible);
-  const isAdmin = membership.role === "admin";
+  const stores = await listStores(membership.groupId, accessible, true);
 
   const requestedPage = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
   const totalPages = Math.max(1, Math.ceil(stores.length / PAGE_SIZE));
@@ -42,7 +43,7 @@ export default async function DashboardPage({
     <>
       <div className="context-line">
         <span className="k">Grupo</span>
-        <h1>Todas as lojas</h1>
+        <h1>{membership.group.name}</h1>
       </div>
 
       {membership.group.subscriptionStatus === "trialing" && (
@@ -82,12 +83,13 @@ export default async function DashboardPage({
         </ExampleNote>
       </div>
 
-      <TrendChart />
-
       <div className="panel">
         <div className="panel-head">
-          <h2>Como cada loja está</h2>
-          <div className="panel-head-sub">Toque numa loja pra ver os detalhes</div>
+          <div>
+            <h2>Como cada loja está</h2>
+            <div className="panel-head-sub">Toque numa loja pra ver os detalhes</div>
+          </div>
+          <AddStoreButton groupId={membership.groupId} />
         </div>
         <div className="ledger-scroll">
           <table className="ledger">
@@ -98,12 +100,14 @@ export default async function DashboardPage({
                 <th className="num-col">Conciliadas</th>
                 <th className="num-col">Divergentes</th>
                 <th>Situação</th>
+                <th>Status</th>
+                <th aria-hidden="true" />
               </tr>
             </thead>
             <tbody>
               {pageStores.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="cell-empty">
+                  <td colSpan={7} className="cell-empty">
                     Nenhuma loja cadastrada ainda.
                   </td>
                 </tr>
@@ -116,6 +120,16 @@ export default async function DashboardPage({
                     <td className="num-col cell-empty">—</td>
                     <td>
                       <span className="pill brass">Conectar fonte</span>
+                    </td>
+                    <td>
+                      {s.active ? (
+                        <span className="pill good">Ativa</span>
+                      ) : (
+                        <span className="pill muted">Desativada</span>
+                      )}
+                    </td>
+                    <td className="actions-col">
+                      <StoreActionsMenu storeId={s.id} storeName={s.name} active={s.active} />
                     </td>
                   </StoreRow>
                 ))
@@ -151,16 +165,7 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {isAdmin && (
-        <div className="panel">
-          <div className="panel-head">
-            <h2>Adicionar loja</h2>
-          </div>
-          <div className="panel-body">
-            <StoreForm groupId={membership.groupId} />
-          </div>
-        </div>
-      )}
+      <TrendChart />
     </>
   );
 }

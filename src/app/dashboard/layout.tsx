@@ -45,7 +45,11 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       </div>
 
       <div className="app-shell">
-        <Rail groupName={membership.group.name} stores={stores.map((s) => ({ id: s.id, name: s.name }))} />
+        <Rail
+          groupName={membership.group.name}
+          stores={stores.map((s) => ({ id: s.id, name: s.name }))}
+          isAdmin={membership.role === "admin"}
+        />
         <main className="content">{children}</main>
       </div>
     </div>

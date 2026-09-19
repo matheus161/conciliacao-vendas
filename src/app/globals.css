@@ -146,6 +146,12 @@ input {
   border-color: var(--brass);
 }
 
+.field input:disabled {
+  background: var(--paper-deep);
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
 .field-error {
   font-size: 13.5px;
   color: var(--bad);
@@ -291,6 +297,22 @@ input {
   opacity: 0.6;
 }
 
+.btn-bad {
+  background: transparent;
+  color: var(--bad);
+  border-color: var(--bad);
+}
+
+.btn-bad:hover {
+  background: var(--bad-soft);
+}
+
+.btn-bad:disabled {
+  color: var(--ink-muted);
+  border-color: var(--rule-strong);
+  cursor: not-allowed;
+}
+
 .btn-sm {
   padding: 7px 13px;
   font-size: 13.5px;
@@ -340,6 +362,13 @@ input {
   background: rgba(28, 43, 58, 0.08);
   color: var(--ink-muted);
   font-style: italic;
+}
+
+.pill.muted {
+  background: rgba(28, 43, 58, 0.08);
+  color: var(--ink-muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(28, 43, 58, 0.35);
 }
 
 .example-note {
@@ -528,6 +557,27 @@ input {
   background: var(--good);
 }
 
+.chart-hit {
+  cursor: pointer;
+}
+
+.chart-tooltip rect {
+  fill: var(--ink);
+  opacity: 0.95;
+}
+
+.chart-tooltip-month {
+  fill: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-tooltip-value {
+  fill: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 /* ---- ledger table (stores overview) ---- */
 .panel-head-sub {
   font-size: 13px;
@@ -576,6 +626,12 @@ table.ledger tbody tr:last-child td {
 
 table.ledger td.num-col {
   text-align: right;
+}
+
+table.ledger .actions-col {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .cell-loja {
@@ -1016,6 +1072,11 @@ a.rail-loja-row:hover {
 }
 
 .panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 16px 20px 12px;
 }
 
@@ -1085,8 +1146,15 @@ a.rail-loja-row:hover {
   align-items: flex-start;
   padding: 13px 16px;
   border-radius: 10px;
+  margin-bottom: 16px;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.notice > span {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: break-word;
 }
 
 .notice strong {
@@ -1107,4 +1175,170 @@ a.rail-loja-row:hover {
 .notice-bad {
   background: var(--bad-soft);
   color: var(--bad);
+}
+
+/* ---- modal (add store, etc.) ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 43, 58, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 20;
+  animation: modal-overlay-in 0.15s ease-out;
+}
+
+/* same signature as .onboard-card / .scoreboard: brass top edge, sharp-then-round corners —
+   a modal is another ledger card, not a generic rounded SaaS dialog */
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--brass);
+  border-radius: 4px 4px 14px 14px;
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 1px 2px rgba(20, 30, 40, 0.04), 0 24px 48px -20px rgba(20, 30, 40, 0.45);
+  animation: modal-card-in 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.modal-card:focus {
+  outline: none;
+}
+
+.modal-card:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: -2px;
+}
+
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-card {
+    animation: none;
+  }
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 4px;
+}
+
+.modal-head h2 {
+  font-size: 17px;
+}
+
+.modal-close {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  border-radius: 7px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+.modal-close:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+
+.modal-body {
+  padding: 14px 20px 22px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ---- kebab (row overflow) menu ---- */
+.kebab {
+  position: relative;
+  display: inline-block;
+}
+
+.kebab-trigger {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  background: none;
+  border-radius: 7px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+.kebab-trigger:hover,
+.kebab-trigger[aria-expanded="true"] {
+  background: var(--paper-deep);
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+.kebab-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 168px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 9px;
+  box-shadow: 0 1px 2px rgba(20, 30, 40, 0.04), 0 16px 32px -18px rgba(20, 30, 40, 0.4);
+  padding: 6px;
+  z-index: 10;
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.menu-item:hover {
+  background: var(--paper-deep);
+}
+
+.menu-item-bad {
+  color: var(--bad);
+}
+
+.menu-item-bad:hover {
+  background: var(--bad-soft);
 }

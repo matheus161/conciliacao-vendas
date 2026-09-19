@@ -33,6 +33,7 @@ model Store {
   name                   String
   code                   String
   city                   String
+  active                 Boolean           @default(true)
   createdAt              DateTime          @default(now())
   membershipAssignments  MembershipStore[]
 

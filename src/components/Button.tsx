@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   block?: boolean;
-  variant?: "primary" | "ghost";
+  variant?: "primary" | "ghost" | "bad";
   size?: "sm";
 };
 
