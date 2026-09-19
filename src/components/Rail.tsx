@@ -173,8 +173,11 @@ export function Rail({
           type="button"
           onClick={toggleCollapsed}
           title={collapsed ? "Expandir menu" : "Reduzir menu"}
+          aria-label={collapsed ? "Expandir menu" : "Reduzir menu"}
         >
-          {collapsed ? "»" : "«"}
+          <svg viewBox="0 0 20 20">
+            <polyline points="12,4 6,10 12,16" />
+          </svg>
         </button>
       </div>
     </aside>

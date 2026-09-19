@@ -695,8 +695,12 @@ tr.is-linked:hover {
   gap: 16px;
   background: linear-gradient(180deg, var(--ink) 0%, #101a23 100%);
   color: #edefea;
-  padding: 12px 24px;
+  height: 58px;
+  padding: 0 24px;
   border-bottom: 3px solid var(--brass);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .topbar-brand {
@@ -786,9 +790,13 @@ tr.is-linked:hover {
   width: 250px;
   flex-shrink: 0;
   position: sticky;
-  top: 0;
+  top: 58px;
+  z-index: 5;
   align-self: flex-start;
-  min-height: 100vh;
+  height: calc(100vh - 58px);
+  max-height: calc(100vh - 58px);
+  overflow-y: auto;
+  overflow-x: hidden;
   background: linear-gradient(180deg, #e8ede6 0%, #dce3d9 100%);
   border-right: 1px solid var(--rule);
   box-shadow: inset -10px 0 16px -16px rgba(20, 30, 24, 0.35);
@@ -1034,12 +1042,26 @@ a.rail-loja-row:hover {
   align-items: center;
   justify-content: center;
   color: var(--ink-muted);
-  font-size: 13px;
 }
 
 .rail-collapse-toggle:hover {
   background: var(--paper-deep);
   color: var(--ink);
+}
+
+.rail-collapse-toggle svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.18s ease;
+}
+
+.rail[data-collapsed="true"] .rail-collapse-toggle svg {
+  transform: rotate(180deg);
 }
 
 .content {
