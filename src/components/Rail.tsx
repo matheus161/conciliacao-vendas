@@ -63,17 +63,15 @@ export function Rail({
       <div className="rail-divider" />
 
       <nav className="rail-nav">
-        {isAdmin && (
-          <Link href="/dashboard" className={`rail-nav-item ${pathname === "/dashboard" ? "is-active" : ""}`}>
-            <svg viewBox="0 0 20 20">
-              <rect x="2.5" y="2.5" width="6" height="6" rx="1.3" />
-              <rect x="11.5" y="2.5" width="6" height="6" rx="1.3" />
-              <rect x="2.5" y="11.5" width="6" height="6" rx="1.3" />
-              <rect x="11.5" y="11.5" width="6" height="6" rx="1.3" />
-            </svg>
-            <span className="rail-nav-label">Visão do grupo</span>
-          </Link>
-        )}
+        <Link href="/dashboard" className={`rail-nav-item ${pathname === "/dashboard" ? "is-active" : ""}`}>
+          <svg viewBox="0 0 20 20">
+            <rect x="2.5" y="2.5" width="6" height="6" rx="1.3" />
+            <rect x="11.5" y="2.5" width="6" height="6" rx="1.3" />
+            <rect x="2.5" y="11.5" width="6" height="6" rx="1.3" />
+            <rect x="11.5" y="11.5" width="6" height="6" rx="1.3" />
+          </svg>
+          <span className="rail-nav-label">Visão do grupo</span>
+        </Link>
 
         <div className={`rail-accordion ${lojasOpen ? "is-open" : ""}`}>
           <button type="button" className="rail-nav-item rail-accordion-toggle" onClick={() => setLojasOpen((o) => !o)}>
@@ -144,18 +142,20 @@ export function Rail({
           <span className="rail-nav-soon">em breve</span>
         </span>
 
-        <Link
-          href="/dashboard/pessoas"
-          className={`rail-nav-item ${pathname === "/dashboard/pessoas" ? "is-active" : ""}`}
-        >
-          <svg viewBox="0 0 20 20">
-            <circle cx="7.2" cy="7" r="2.7" />
-            <path d="M2 16c0-2.8 2.3-4.5 5.2-4.5S12.4 13.2 12.4 16" />
-            <circle cx="14.5" cy="7.5" r="2.1" />
-            <path d="M13.2 11.7c2.3.3 3.8 1.8 3.8 4.3" />
-          </svg>
-          <span className="rail-nav-label">Pessoas</span>
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/dashboard/pessoas"
+            className={`rail-nav-item ${pathname === "/dashboard/pessoas" ? "is-active" : ""}`}
+          >
+            <svg viewBox="0 0 20 20">
+              <circle cx="7.2" cy="7" r="2.7" />
+              <path d="M2 16c0-2.8 2.3-4.5 5.2-4.5S12.4 13.2 12.4 16" />
+              <circle cx="14.5" cy="7.5" r="2.1" />
+              <path d="M13.2 11.7c2.3.3 3.8 1.8 3.8 4.3" />
+            </svg>
+            <span className="rail-nav-label">Pessoas</span>
+          </Link>
+        )}
 
         <span className="rail-nav-item is-disabled">
           <svg viewBox="0 0 20 20">

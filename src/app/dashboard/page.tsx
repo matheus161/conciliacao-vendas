@@ -27,10 +27,10 @@ export default async function DashboardPage({
     include: { group: true },
   });
   if (!membership) redirect("/login");
-  if (membership.role !== "admin") redirect("/dashboard/pessoas");
+  const isAdmin = membership.role === "admin";
 
   const accessible = await getAccessibleStoreIds(session.userId, membership.groupId);
-  const stores = await listStores(membership.groupId, accessible, true);
+  const stores = await listStores(membership.groupId, accessible, isAdmin);
 
   const requestedPage = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
   const totalPages = Math.max(1, Math.ceil(stores.length / PAGE_SIZE));
@@ -89,7 +89,7 @@ export default async function DashboardPage({
             <h2>Resumo das lojas</h2>
             <div className="panel-head-sub">Toque numa loja pra ver os detalhes</div>
           </div>
-          <AddStoreButton groupId={membership.groupId} />
+          {isAdmin && <AddStoreButton groupId={membership.groupId} />}
         </div>
         <div className="ledger-scroll">
           <table className="ledger">
@@ -100,14 +100,14 @@ export default async function DashboardPage({
                 <th className="num-col">Conciliadas</th>
                 <th className="num-col">Divergentes</th>
                 <th>Situação</th>
-                <th>Status</th>
-                <th aria-hidden="true" />
+                {isAdmin && <th>Status</th>}
+                {isAdmin && <th aria-hidden="true" />}
               </tr>
             </thead>
             <tbody>
               {pageStores.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="cell-empty">
+                  <td colSpan={isAdmin ? 7 : 5} className="cell-empty">
                     Nenhuma loja cadastrada ainda.
                   </td>
                 </tr>
@@ -121,16 +121,20 @@ export default async function DashboardPage({
                     <td>
                       <span className="pill brass">Conectar fonte</span>
                     </td>
-                    <td>
-                      {s.active ? (
-                        <span className="pill good">Ativa</span>
-                      ) : (
-                        <span className="pill muted">Desativada</span>
-                      )}
-                    </td>
-                    <td className="actions-col">
-                      <StoreActionsMenu storeId={s.id} storeName={s.name} active={s.active} />
-                    </td>
+                    {isAdmin && (
+                      <td>
+                        {s.active ? (
+                          <span className="pill good">Ativa</span>
+                        ) : (
+                          <span className="pill muted">Desativada</span>
+                        )}
+                      </td>
+                    )}
+                    {isAdmin && (
+                      <td className="actions-col">
+                        <StoreActionsMenu storeId={s.id} storeName={s.name} active={s.active} />
+                      </td>
+                    )}
                   </StoreRow>
                 ))
               )}
