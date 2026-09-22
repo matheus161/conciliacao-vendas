@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
 
 type Store = { id: string; name: string };
@@ -9,36 +10,41 @@ export function StoreAssignmentControl({
   membershipId,
   groupStores,
   initialStoreIds,
+  onSaved,
 }: {
   membershipId: string;
   groupStores: Store[];
   initialStoreIds: string[];
+  onSaved?: () => void;
 }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string[]>(initialStoreIds);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function toggle(storeId: string) {
-    setSaved(false);
     setSelected((prev) => (prev.includes(storeId) ? prev.filter((id) => id !== storeId) : [...prev, storeId]));
   }
 
   async function handleSave() {
+    if (saving) return;
     setSaving(true);
-    setSaved(false);
     setError(null);
-    const res = await fetch(`/api/memberships/${membershipId}/stores`, {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ storeIds: selected }),
-    });
-    setSaving(false);
-    if (res.status === 200) {
-      setSaved(true);
-      return;
+    try {
+      const res = await fetch(`/api/memberships/${membershipId}/stores`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ storeIds: selected }),
+      });
+      if (res.status === 200) {
+        router.refresh();
+        onSaved?.();
+        return;
+      }
+      setError("Não foi possível salvar o acesso.");
+    } finally {
+      setSaving(false);
     }
-    setError("Não foi possível salvar o acesso.");
   }
 
   return (
@@ -61,8 +67,8 @@ export function StoreAssignmentControl({
           {error}
         </p>
       )}
-      <Button type="button" variant="ghost" size="sm" onClick={handleSave} disabled={saving}>
-        {saving ? "Salvando…" : saved ? "Salvo" : "Salvar acesso"}
+      <Button type="button" onClick={handleSave} disabled={saving}>
+        {saving ? "Salvando…" : "Salvar acesso"}
       </Button>
     </div>
   );
