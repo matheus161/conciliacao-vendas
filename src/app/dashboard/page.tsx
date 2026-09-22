@@ -86,7 +86,7 @@ export default async function DashboardPage({
       <div className="panel">
         <div className="panel-head">
           <div>
-            <h2>Como cada loja está</h2>
+            <h2>Resumo das lojas</h2>
             <div className="panel-head-sub">Toque numa loja pra ver os detalhes</div>
           </div>
           <AddStoreButton groupId={membership.groupId} />

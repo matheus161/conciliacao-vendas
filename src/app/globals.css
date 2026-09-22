@@ -616,10 +616,6 @@ table.ledger tbody td {
   vertical-align: middle;
 }
 
-table.ledger tbody tr:nth-child(even) {
-  background: rgba(28, 43, 58, 0.028);
-}
-
 table.ledger tbody tr:last-child td {
   border-bottom: none;
 }
@@ -689,6 +685,16 @@ tr.is-linked:hover {
 }
 
 /* ---- authenticated shell (dashboard) ---- */
+/* fixed-height header + a single dedicated scroll region below it, so the page's own
+   scrollbar never runs behind the header — instead of a sticky header floating over
+   a full-page scroll, .app-shell is the only thing that scrolls. */
+.authed-shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -696,11 +702,9 @@ tr.is-linked:hover {
   background: linear-gradient(180deg, var(--ink) 0%, #101a23 100%);
   color: #edefea;
   height: 58px;
+  flex-shrink: 0;
   padding: 0 24px;
   border-bottom: 3px solid var(--brass);
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
 .topbar-brand {
@@ -782,6 +786,9 @@ tr.is-linked:hover {
 
 /* ---- app shell: rail (sidebar) + content ---- */
 .app-shell {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   align-items: flex-start;
 }
@@ -790,11 +797,10 @@ tr.is-linked:hover {
   width: 250px;
   flex-shrink: 0;
   position: sticky;
-  top: 58px;
-  z-index: 5;
+  top: 0;
   align-self: flex-start;
-  height: calc(100vh - 58px);
-  max-height: calc(100vh - 58px);
+  height: 100%;
+  max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   background: linear-gradient(180deg, #e8ede6 0%, #dce3d9 100%);
@@ -810,6 +816,35 @@ tr.is-linked:hover {
 .rail[data-collapsed="true"] {
   width: 64px;
   padding: 20px 10px;
+}
+
+/* thin, understated scrollbar for the two internal scroll regions (rail, content column) —
+   matches the ledger's quiet palette instead of a chunky default OS scrollbar */
+.app-shell,
+.rail {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+
+.app-shell::-webkit-scrollbar,
+.rail::-webkit-scrollbar {
+  width: 8px;
+}
+
+.app-shell::-webkit-scrollbar-track,
+.rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-shell::-webkit-scrollbar-thumb,
+.rail::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border-radius: 999px;
+}
+
+.app-shell::-webkit-scrollbar-thumb:hover,
+.rail::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-muted);
 }
 
 .rail[data-collapsed="true"] .rail-group {
@@ -901,7 +936,7 @@ tr.is-linked:hover {
   flex-shrink: 0;
 }
 
-a.rail-nav-item:hover {
+.rail-nav-item:not(.is-disabled):hover {
   background: rgba(28, 43, 58, 0.07);
 }
 
