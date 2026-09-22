@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { AuthError } from "./authService";
 
 export type MemberRole = "admin" | "operator" | "support";
 
@@ -25,6 +26,16 @@ export type InviteResult = { id: string; email: string; role: MemberRole };
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function inviteMember(groupId: string, input: InviteInput): Promise<InviteResult> {
+  const existingUser = await db.user.findUnique({ where: { email: input.email } });
+  if (existingUser) {
+    const existingMembership = await db.membership.findUnique({
+      where: { userId_groupId: { userId: existingUser.id, groupId } },
+    });
+    if (existingMembership) {
+      throw new AuthError("ALREADY_MEMBER", `${input.email} já é membro deste grupo`);
+    }
+  }
+
   const pending = await db.pendingMembership.create({
     data: {
       groupId,

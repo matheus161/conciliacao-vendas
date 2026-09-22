@@ -6,7 +6,8 @@ export class AuthError extends Error {
     | "EMAIL_TAKEN"
     | "INVALID_CREDENTIALS"
     | "INVITE_NOT_FOUND"
-    | "ACCOUNT_EXISTS";
+    | "ACCOUNT_EXISTS"
+    | "ALREADY_MEMBER";
   constructor(code: AuthError["code"], message: string) {
     super(message);
     this.code = code;

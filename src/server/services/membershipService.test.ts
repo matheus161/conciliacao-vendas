@@ -115,6 +115,54 @@ describe("membershipService", () => {
   });
 });
 
+describe("inviteMember — already a member", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  it("rejects inviting an e-mail that already has an active membership in the group", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const firstInvite = await inviteMember(groupId, { email: "operador@franquia.com", role: "operator" });
+    await acceptInvite({ pendingMembershipId: firstInvite.id, password: "outrasenha123" });
+
+    await expect(
+      inviteMember(groupId, { email: "operador@franquia.com", role: "support" })
+    ).rejects.toMatchObject({ code: "ALREADY_MEMBER" });
+  });
+
+  it("allows inviting an e-mail that has an account but is a member of a different group", async () => {
+    const { groupId: groupA } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+    const { groupId: groupB } = await signup({
+      email: "membro@outra.com",
+      password: "supersecret1",
+      groupName: "Outra Franquia",
+    });
+
+    const invite = await inviteMember(groupA, { email: "membro@outra.com", role: "operator" });
+    expect(invite.email).toBe("membro@outra.com");
+    expect(groupB).not.toBe(groupA);
+  });
+
+  it("allows inviting a brand-new e-mail with no account at all", async () => {
+    const { groupId } = await signup({
+      email: "admin@franquia.com",
+      password: "supersecret1",
+      groupName: "Franquia Norte",
+    });
+
+    const invite = await inviteMember(groupId, { email: "novo@franquia.com", role: "operator" });
+    expect(invite.email).toBe("novo@franquia.com");
+  });
+});
+
 describe("getAccessibleStoreIds", () => {
   beforeEach(async () => {
     await resetDb();
